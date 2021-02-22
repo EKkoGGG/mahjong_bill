@@ -8,6 +8,7 @@ from pywebio.session import set_env
 
 
 def main():
+    set_env(title='麻将分账')
     put_markdown("""# 麻将分账
     Good Luck !
     """, strip_indent=4)
@@ -20,7 +21,7 @@ def main():
         input('水钱（个）', name='water', type=NUMBER),
         input('房费（元）', name='room_pay', type=FLOAT),
         select('付房费者', name='room_payer', options=['一号', '二号', '三号', '四号'])
-    ])
+    ], validate=check_form)
 
     unit_price = info['unit_price']
     win1 = Player('一号', info['win1']*unit_price)
@@ -51,7 +52,6 @@ def main():
         win3.amount += room_pay
     elif room_payer == '四号':
         win4.amount += room_pay
-
 
     win_list = []
     win_list.append(win1)
@@ -92,11 +92,21 @@ def main():
         put_markdown(log_item)
 
 
+def check_form(info):
+    if info['unit_price'] <= 0:
+        return ('unit_price', '不能为负数！')
+    amount = info['win1'] + info['win2'] + \
+        info['win3'] + info['win4'] + info['water']
+    if amount != 0:
+        return ('room_payer', '数据有误，收支不相等，请检查！')
+
+
 class Player(object):
     def __init__(self, name, amount, repay=0):
         self.name = name
         self.amount = amount
         self.repay = repay
+
 
 if __name__ == '__main__':
     start_server(main, port=9003)
