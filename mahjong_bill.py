@@ -16,10 +16,10 @@ def main():
     names = input_names()
     # 获取分账信息
     unit_price = info['unit_price']
-    player1 = Player(names['name1'], info['player1']*unit_price)
-    player2 = Player(names['name2'], info['player2']*unit_price)
-    player3 = Player(names['name3'], info['player3']*unit_price)
-    player4 = Player(names['name4'], info['player4']*unit_price)
+    player1 = Player(name=names['name1'], amount=info['player1']*unit_price)
+    player2 = Player(name=names['name2'], amount=info['player2']*unit_price)
+    player3 = Player(name=names['name3'], amount=info['player3']*unit_price)
+    player4 = Player(name=names['name4'], amount=info['player4']*unit_price)
     water = info['water']*unit_price
     room_pay = info['room_pay']
     room_payer = info['room_payer']
@@ -34,15 +34,20 @@ def main():
         real_room_pay = -real_room_pay
     unit_room_pay = real_room_pay/4
     for item in player_list:
+        item.real_amount = item.amount
         item.amount += unit_room_pay
     if room_payer == '一号':
         player1.amount += room_pay
+        player1.isPayRoom = True
     elif room_payer == '二号':
         player2.amount += room_pay
+        player2.isPayRoom = True
     elif room_payer == '三号':
         player3.amount += room_pay
+        player3.isPayRoom = True
     elif room_payer == '四号':
         player4.amount += room_pay
+        player4.isPayRoom = True
     player_list.sort(key=lambda e: e.amount)
     # 分账计算
     minIndex = 0
@@ -57,11 +62,16 @@ def main():
         if i + 1 == player_list.count:
             break
         if i < minIndex:
+            index = minIndex
             if item.amount == 0:
                 continue
-            player_list[minIndex].repay += abs(item.amount)
+            for j,item2 in enumerate(player_list[minIndex:]):
+                if item2.amount == abs(item.amount) and item2.repay != abs(item.amount):
+                    index = j+minIndex
+                    break
+            player_list[index].repay += abs(item.amount)
             log = '%s 给 %s %s 元' % (
-                item.name, player_list[minIndex].name, abs(item.amount))
+                item.name, player_list[index].name, abs(item.amount))
             log_list.append(log)
         else:
             if item.repay - item.amount == 0:
@@ -69,9 +79,12 @@ def main():
             player_list[i+1].repay += (item.repay - item.amount)
             log = '%s 给 %s %s 元' % (
                 item.name, player_list[i+1].name, item.repay - item.amount)
-            log_list.append(log)
+            log_list.append(log)      
+    put_text('\n')
     for log_item in log_list:
         put_markdown(log_item)
+
+    out_bill_info(player_list, room_pay, unit_room_pay,water)
 
 
 def out_header():
@@ -112,11 +125,34 @@ def check_form(info):
         return ('room_payer', '数据有误，收支不相等，请检查！')
 
 
+def out_bill_info(player_list, room_pay, unit_room_pay,water):
+    put_text('\n')
+    for item in player_list:
+        if item.isPayRoom == True:
+            item.amount -= room_pay
+            put_text('%s 支付房费 %s 元，扣除水钱 %s 元后，人均房费 %s 元' 
+            % (item.name,room_pay,water,abs(unit_room_pay)))
+            player_list.sort(key=lambda e: e.amount)
+            break
+    put_table([
+        [player_list[3].name, player_list[3].real_amount,
+            unit_room_pay, player_list[3].amount],
+        [player_list[2].name, player_list[2].real_amount,
+            unit_room_pay, player_list[2].amount],
+        [player_list[1].name, player_list[1].real_amount,
+            unit_room_pay, player_list[1].amount],
+        [player_list[0].name, player_list[0].real_amount,
+            unit_room_pay, player_list[0].amount]
+    ], header=['玩家昵称', '胜负（元）', '房费（元）', '净收入（元）'])
+
+
 class Player(object):
-    def __init__(self, name, amount, repay=0):
+    def __init__(self, name, amount, real_amount=0, repay=0, isPayRoom=False):
         self.name = name
         self.amount = amount
+        self.real_amount = real_amount
         self.repay = repay
+        self.isPayRoom = isPayRoom
 
 
 if __name__ == '__main__':
