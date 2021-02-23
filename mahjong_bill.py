@@ -29,9 +29,7 @@ def main():
     player_list.append(player2)
     player_list.append(player3)
     player_list.append(player4)
-    real_room_pay = room_pay - water
-    if water > room_pay:
-        real_room_pay = -real_room_pay
+    real_room_pay = water - room_pay
     unit_room_pay = real_room_pay/4
     for item in player_list:
         item.real_amount = item.amount
