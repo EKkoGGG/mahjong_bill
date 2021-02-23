@@ -16,11 +16,11 @@ def main():
     names = input_names()
     # 获取分账信息
     unit_price = info['unit_price']
-    player1 = Player(name=names['name1'], amount=info['player1']*unit_price)
-    player2 = Player(name=names['name2'], amount=info['player2']*unit_price)
-    player3 = Player(name=names['name3'], amount=info['player3']*unit_price)
-    player4 = Player(name=names['name4'], amount=info['player4']*unit_price)
-    water = info['water']*unit_price
+    player1 = Player(name=names['name1'], amount=info['player1']*unit_price*1.0)
+    player2 = Player(name=names['name2'], amount=info['player2']*unit_price*1.0)
+    player3 = Player(name=names['name3'], amount=info['player3']*unit_price*1.0)
+    player4 = Player(name=names['name4'], amount=info['player4']*unit_price*1.0)
+    water = info['water']*unit_price*1.0
     room_pay = info['room_pay']
     room_payer = info['room_payer']
     # 计算房费
@@ -30,7 +30,7 @@ def main():
     player_list.append(player3)
     player_list.append(player4)
     real_room_pay = room_pay - water
-    if water < room_pay:
+    if water > room_pay:
         real_room_pay = -real_room_pay
     unit_room_pay = real_room_pay/4
     for item in player_list:
@@ -59,7 +59,7 @@ def main():
         minIndex += 1
 
     for i, item in enumerate(player_list):
-        if i + 1 == player_list.count:
+        if i + 1 == 4:
             break
         if i < minIndex:
             index = minIndex
@@ -119,6 +119,8 @@ def input_names():
 def check_form(info):
     if info['unit_price'] <= 0:
         return ('unit_price', '不能为负数！')
+    if info['water'] <= 0:
+        return ('water', '不能为负数！')
     amount = info['player1'] + info['player2'] + \
         info['player3'] + info['player4'] + info['water']
     if amount != 0:
@@ -130,8 +132,12 @@ def out_bill_info(player_list, room_pay, unit_room_pay,water):
     for item in player_list:
         if item.isPayRoom == True:
             item.amount -= room_pay
-            put_text('%s 支付房费 %s 元，扣除水钱 %s 元后，人均房费 %s 元' 
-            % (item.name,room_pay,water,abs(unit_room_pay)))
+            if water <= room_pay:
+                put_text('%s 支付房费 %s 元，扣除水钱 %s 元后，人均房费 %s 元'
+                % (item.name,room_pay,water,abs(unit_room_pay)))
+            else:
+                put_text('%s 支付房费 %s 元，水钱 %s 元，人均收入剩余水钱 %s 元'
+                % (item.name,room_pay,water,abs(unit_room_pay)))                
             player_list.sort(key=lambda e: e.amount)
             break
     put_table([
