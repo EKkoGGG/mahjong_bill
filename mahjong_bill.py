@@ -80,7 +80,7 @@ def main():
             log_list.append(log)      
     put_text('\n')
     for log_item in log_list:
-        put_markdown(log_item)
+        put_markdown('> '+log_item)
 
     out_bill_info(player_list, room_pay, unit_room_pay,water)
 
@@ -88,7 +88,7 @@ def main():
 def out_header():
     set_env(title='麻将分账')
     put_markdown("""# 麻将分账
-    Good Luck !
+    `Good Luck !`
     """, strip_indent=4)
 
 
@@ -131,10 +131,10 @@ def out_bill_info(player_list, room_pay, unit_room_pay,water):
         if item.isPayRoom == True:
             item.amount -= room_pay
             if water <= room_pay:
-                put_text('%s 支付房费 %s 元，扣除水钱 %s 元后，人均房费 %s 元'
+                put_markdown('`%s 支付房费 %s 元，扣除水钱 %s 元后，人均房费 %s 元`'
                 % (item.name,room_pay,water,abs(unit_room_pay)))
             else:
-                put_text('%s 支付房费 %s 元，水钱 %s 元，人均收入剩余水钱 %s 元'
+                put_markdown('`%s 支付房费 %s 元，水钱 %s 元，人均收入剩余水钱 %s 元`'
                 % (item.name,room_pay,water,abs(unit_room_pay)))                
             player_list.sort(key=lambda e: e.amount)
             break
